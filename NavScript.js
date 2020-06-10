@@ -1,5 +1,5 @@
 window.onscroll = function () {StickyHeader ()};
-window.onresize = function () {OnResize ()}
+// window.onresize = function () {OnResize ()}
 
 var header = document.getElementById ("header_id");
 var stickyHeader = document.getElementById ("stickyheader_id");

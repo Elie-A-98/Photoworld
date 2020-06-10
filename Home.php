@@ -1,6 +1,8 @@
 <?php
 session_start ();
 
+header('X-XSS-Protection:0');
+
 require "Database/Connection.php";
 
 if ($connected == false) goto render ;
@@ -24,17 +26,19 @@ if ($isUser) {
 		extract ($_FILES);
 
 		if ($isSubmit && $submit =="Upload"){
-
+			
 			if (isset($title)) {		// title  will always be set but maybe empty because it is a textbox
 				if ( isset ($url) && !empty ($url)){	// textboxes are always set but return empty if not filled when posting
 
 					if (!empty ($title) && !empty ($url)) {
+
 						InsertImage ($id, $title, $url, $description,"", false);
+
 					}
 
 					
 				}else if (!empty ($file_to_upload["tmp_name"])) {
-
+					
 					$checkImage = true ;
 
 					$isImage = getimagesize ($file_to_upload["tmp_name"]);  // getimagesize is not trusted --> CHANGE IT
@@ -43,9 +47,11 @@ if ($isUser) {
 					if ( !$isImage || $imageType != "jpg" && $imageType != "jpeg" && $imageType != "png" && $imageType != "gif"){
 						$checkImage = false ;
 					}
-
+					// echo $title;
 					if ($checkImage) {
-						InsertImage ($id, $title, "", $description, $file_to_upload, true);
+						if (!InsertImage ($id, $title, "", $description, $file_to_upload, true)){
+							throw new Exception (mysqli_error ($GLOBALS["conn"]));
+						}
 						$file_to_upload = NULL;
 					}
 				}
@@ -58,10 +64,12 @@ if ($isUser) {
 		}
 	}
 
-    $user = getCurrentUser ($id);
-    $username = mysqli_fetch_assoc ($user)["name"];
+	// $user = getCurrentUser ($id);
+	$username = $_SESSION ["username"];
 	$images = getUserImages ($id);
 	$user_settings = mysqli_fetch_assoc (getUserSettings ($id)) ;
+
+	$_SESSION ["user_settings"] = $user_settings;
 
 }else {
     header ("Location:Login.php");
@@ -162,7 +170,7 @@ render :
 
 			</div>
 
-            <input type="submit" class="w3-btn w3-round-xxlarge" style="background-color:rgb(210, 210, 210);" name="submit" value ="Upload">
+            <input type="submit" class="w3-btn w3-round-xxlarge w3-blue" style="background-color:rgb(210, 210, 210);" name="submit" value ="Upload">
         </form>
 		
 			
@@ -191,7 +199,11 @@ render :
 					</div>
 					
 					<div class="w3-left">
-						<h4> <button class="w3-btn w3-round-xxlarge w3-hover-purple w3-margin-left" style="background-color:rgb(185, 185, 185);">Start SlideShow </button>
+						<h4> <button type="button" class="w3-btn w3-round-xxlarge w3-hover-purple w3-margin-left" 
+							style="background-color:rgb(185, 185, 185);"
+							onclick="OpenModal(0)">
+							Start SlideShow 
+						</button>
 						</h4>
 					</div>
 				</div>
@@ -215,101 +227,7 @@ render :
 		</div>
 		<hr>
 
-		<!-- Images -->
-		<div style = "position:relative;">
-
-			<div class = "images_background" style="background-color:<?php echo $user_settings['image_section_color']?>;"></div>
-
-			<div>
-				<?php
-					function AddRow () {
-						echo "<div class ='w3-row-padding'>";
-					}
-					function EndRow () {
-						echo "</div>";
-					}
-					
-					function AddImage ($path,$title,$index) {
-						echo "<div class ='w3-third w3-center w3-padding w3-hover-sepia' onclick='OpenModal($index)'>
-								<img class='image w3-animate-top' src ='$path' style='width:100%'></img>
-							</div>";
-					}
-
-					$i = 0;
-					while ($row = mysqli_fetch_assoc ($images)){
-						if ($i % 3 == 0){
-							if ($i > 0) EndRow ();
-							AddRow ();
-						}
-
-						AddImage ($row["location"],$row["title"],$i);
-
-						$i++;
-					}
-					EndRow () ;
-					
-				?>
-			</div>
-			
-		
-		</div>
-		
-	
-	</div>
-	<!-- End Image Section -->
-
-
-	<!-- Modal -->
-	<div id ="home_modal" class ="w3-modal" style="z-index:20;">
-		<!-- for LARGE screens-->
-		<div id="modal_1" class ="w3-hide-medium w3-hide-small w3-cell-row w3-display-middle" style="width:90%;height:90%;">
-			
-			<div class ="w3-cell w3-cell-middle w3-animate-left" >
-				<button class="w3-button w3-light-gray" onclick="ChangeIndex(-1)">&#10094;</button>
-			</div>
-
-			<div class ="w3-cell w3-cell-middle w3-animate-top " style="z-index:-1;width:100%;height:100%;">
-
-				<div class ="w3-modal-content w3-display-container" style="width:100%;height:100%;">
-					
-					<div id="modal_images_div_1" style ="width:70%; height:100%; background-color:black">first </div>
-					
-					<!-- Comment Section -->
-					<div class="w3-display-topright w3-display-container" style="width:30%; height:100%; background-color:red;">
-						<div class ="w3-display-topright">
-							<span class="w3-animate-top w3-button" style="font-size:40px;" onclick = "CloseModal()">&times;</span>
-						</div>
-						ASDASDASDASDSADASDASDASDASDSADSADASDWASDASDASDASD
-					</div>
-					<!-- END COMMENT SECTION -->
-
-				</div>
-
-			</div>
-
-			<div class ="w3-cell w3-cell-middle w3-animate-right">
-				<button class="w3-button w3-light-gray" onclick="ChangeIndex(1)">&#10095;</button>
-			</div>
-
-		</div>
-
-		<!-- for SMALL and MEDIUM screens-->
-		<div id ="modal_2" class ="w3-hide-large w3-display-middle" style="width: 95%; height:95%;">
-
-			<div class= "w3-modal-content w3-display-container w3-animate-left" style="width:100%;height:100%;background-color:black;">
-				<div id="modal_images_div_2" class="w3-display-middle" style ="width:100%; height:100%;"> 
-					
-				</div>
-
-				<div class ="w3-display-topright">
-					<span class="w3-animate-left w3-button w3-text-white" style="font-size:40px;" onclick = "CloseModal()">&times;</span>
-				</div>
-
-			</div>
-
-		</div>
-	</div>
-	<!-- End Modal -->
+	<?php include_once "imagesSection.php"; ?>
 	
 
 </div>
@@ -318,89 +236,7 @@ render :
 
 <script src = "NavScript.js" type="text/javascript"></script>
 <script src = "PhoneScript.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-
-var images = document.getElementsByClassName ("image");
-
-var modal_image_div ; // initialized when modal is opened
-var modal_image_index = 0 ;
-var modal_image_animation ;
-
-function ChangeIndex (x){
-	
-	if (x < 0){
-		modal_image_animation = "w3-animate-right";
-	}else {
-		modal_image_animation = "w3-animate-left";
-	}
-
-	modal_image_index += x ;
-	if (modal_image_index < 0) modal_image_index = images.length-1;
-	modal_image_index = modal_image_index % images.length;
-
-	ShowImage (modal_image_index);
-}
-
-function ShowImage (index){
-
-	var div = document.createElement ("div");
-	var img = document.createElement ("img");
-
-	div.classList.add ("w3-display-container", modal_image_animation);
-	div.style.width = "100%";
-	div.style.height = "100%";
-	
-	img.src = images[index].src ;
-	
-	img.classList.add ("w3-display-middle");
-	img.style.maxWidth = "100%";
-	img.style.maxHeight = "100%";
-
-	div.appendChild (img);
-	
-	modal_image_div.innerHTML = "";
-	modal_image_div.appendChild (div);
-
-}
-
-function OpenModal (index){
-	AddTouchHandlers () ;
-
-	modal_image_div = document.getElementById ("modal_images_div_1");
-
-	modal = document.getElementById("home_modal");
-	modal.style.display = "block";
-
-	modal_image_index = index ;
-	modal_image_animation = "w3-animate-opacity";
-	ShowImage (index);
-}
-
-function CloseModal (){
-	RemoveTouchHandlers () ;
-
-	modal = document.getElementById("home_modal");
-	modal.style.display = "none";
-}
-
-function SwipeLeft (){
-	ChangeIndex (-1);
-}
-
-function SwipeRight (){
-	ChangeIndex (1);
-}
-
-function SwipeUp (){
-	
-}
-
-function SwipeDown (){
-	
-}
-
-</script>
+<script type="text/javascript" src ="Images.js"> </script>
 
 </body>
 

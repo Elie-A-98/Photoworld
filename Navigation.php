@@ -14,7 +14,7 @@
             <div class = "w3-cell-row w3-opacity">
                 <div class="w3-bar w3-cell" style = "width:65%;">
                     <a href="Home.php" class="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">Home</a>
-                    <a href="Home.php" class="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">Users</a>
+                    <a href="Users.php" class="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">Users</a>
                     <a href="Home.php" class="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">Contact</a>
                     <a href="Home.php" class="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">About us</a>
 				</div>
@@ -34,7 +34,7 @@
 				</div> 
 
                 <div class="w3-cell w3-cell-middle w3-dropdown-hover w3-right">
-                    <button  class="w3-btn w3-hover-black w3-large"><?php echo ($username); ?></button>
+                    <button  class="w3-btn w3-hover-black w3-large"><?php echo $_SESSION ["username"]; ?></button>
                         <div class = "w3-bar-block w3-dropdown-content w3-border" style="right:0;" >
                         <a href ="Home.php" class ="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">Account</a>
                         <form method="POST" action ="Login.php">
@@ -65,7 +65,7 @@
     <div class ="w3-hide w3-bar-block w3-hide-large w3-border-left w3-border-bottom w3-animate-opacity" 
          style ="position:absolute;bottom:auto;right:0;z-index:4;background-color: white;" id="bars">
         <a href="Home.php" class="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">Home</a>
-        <a href="Home.php" class="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">Users</a>
+        <a href="Users.php" class="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">Users</a>
         <a href="Home.php" class="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">Contact</a>
         <a href="Home.php" class="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">About us</a>
         <a href="Home.php" class ="w3-bar-item w3-mobile w3-btn w3-hover-black w3-large">Account</a>

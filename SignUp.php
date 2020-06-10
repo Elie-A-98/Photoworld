@@ -1,7 +1,3 @@
-<?php
-	session_start ();
-?>
-
 <!DOCTYPE HTML>
 
 <html>
@@ -27,8 +23,17 @@ if ( $_SERVER["REQUEST_METHOD"] == "POST" ){
 	if (!isValid()) {goto render;}
 	
 	$new_user_id ;
+	
 	if (InsertUser ($fname, $lname, $email, $pass, $new_user_id)){
+		session_destroy ();
+		session_start ();
+
 		$_SESSION["id"] = $new_user_id;
+		
+		$new_user = getCurrentUser ($new_user_id);
+		$_SESSION["username"] = mysqli_fetch_assoc ($new_user)["name"];
+		$_SESSION["email"] = mysqli_fetch_assoc ($new_user)["email"];
+
 		header ("Location:Home.php");
 	}
 	
@@ -60,7 +65,9 @@ function isValid () {
 	}else {
 		$GLOBALS["passErr"] = "*PASSWORD IS REQUIRED"; $valid=false;
 	}
+
 	
+
 	return $valid ;
 }
 

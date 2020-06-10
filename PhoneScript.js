@@ -36,7 +36,7 @@ function TouchMoveHandler (evt) {
 	var xDiff = x2 - x1 ;
 	var yDiff = y2 - y1 ;
 
-	if (Math.abs (xDiff) < 80 && Math.abs (yDiff) < 80) returns ;
+	if (Math.abs (xDiff) < 300 && Math.abs (yDiff) < 200) return ;
 
 	if (Math.abs (xDiff) > Math.abs(yDiff)) {
 		if (xDiff > 0 ){

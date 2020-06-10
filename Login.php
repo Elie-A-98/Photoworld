@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 
 require "Database/Connection.php";
 
@@ -14,8 +14,15 @@ if ($isPost && $isSubmit){
     extract ($_POST);
     if (isset ($email) && isset ($email) && !empty ($email) && !empty ($password)){
         $user = getUserLogin ($email,$password);
-        if ($user->num_rows > 0){
-            $_SESSION["id"] = mysqli_fetch_assoc ($user)["id"];
+        if ($user != null && $user->num_rows > 0){
+			session_start();
+
+			$current_user = mysqli_fetch_assoc ($user);
+
+			$_SESSION["id"] = $current_user["id"];
+			$_SESSION["username"] = $current_user["name"];
+			$_SESSION["email"] = $current_user["email"]; 
+
             header ("Location:Home.php");
         }else {
             $err = "Wrong email or password";
@@ -24,7 +31,7 @@ if ($isPost && $isSubmit){
         $err ="Inavlid input";
     }
     
-}else if ($isPost && $isSignOut){
+}else if ($isPost && $isSignOut && isset ($_SESSION["id"])){
     session_destroy ();
 }
 
